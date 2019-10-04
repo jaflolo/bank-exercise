@@ -226,8 +226,6 @@ public class AccountServiceImpl implements AccountService {
 
         accountRepository.save(account);
 
-        System.out.println("--> SERVICE NEW BALANCE: " + account.getBalance());
-
         final String transactionId = saveTransaction(transactionType, transaction, account, amount);
         responseDTO.setTransactionId(transactionId);
         return responseDTO;
