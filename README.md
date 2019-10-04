@@ -4,12 +4,12 @@ This project was created to show some Spring Boot features.
 
 ## 1. Tools and Technologies Used
 
-1. OS: Ubuntu Xenial Version 18.04 
-2. Maven: Version 3.6.0
-3. Java: Version 1.8.0_222
-4. Spring Boot: Version 2.1.8.RELEASE
-5. IntelliJ IDEA: Version 2019.2 (Community Edition)
-6. Swagger: Version 2+
+- OS: Ubuntu Xenial Version 18.04 
+- Maven: Version 3.6.0
+- Java: Version 1.8.0_222
+- Spring Boot: Version 2.1.8.RELEASE
+- IntelliJ IDEA: Version 2019.2 (Community Edition)
+- Swagger: Version 2+
 
 ## 2. Compile Project
 
