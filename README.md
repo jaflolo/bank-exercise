@@ -139,6 +139,9 @@ Current Balance: 20.00
 ```
 That's it, feel free to interact with the client interface.
 
+## Lauch Swagger
+While the spring boot proyect is started, you can lauch swagger UI, it is available at http://localhost:8080/swagger-ui.html. Here is the Home Page of Swagger where you can see all the resources that are exposed.
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
