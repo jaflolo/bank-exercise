@@ -15,39 +15,35 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
-/**
- * This DTO is used to send information to open an account
- *
- * Please see the {@link AccountRequestDTO} class for
- * @author jaflolo
- *
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel(description = "Required information to open an account.")
 public class AccountRequestDTO implements Serializable {
 
     private static final long serialVersionUID = 7574902247947747576L;
 
-    @NotBlank(message = "First name is mandatory")
+    @ApiModelProperty(notes = "The account holder first name")
     private String firstName;
 
-    @NotBlank(message = "Last name is mandatory")
+    @ApiModelProperty(notes = "The account holder last name")
     private String lastName;
 
-    @NotBlank(message = "Pin number is mandatory")
+    @ApiModelProperty(notes = "The account pin")
     private String accountPin;
 
-    @NotBlank(message = "Pin confirmation number is mandatory")
+    @ApiModelProperty(notes = "The account pin confirmation")
     private String confAccountPin;
 
+    @ApiModelProperty(notes = "The account holder ID (SSN, Voter Card ID)")
     private String holderIdNumber;
 
 }

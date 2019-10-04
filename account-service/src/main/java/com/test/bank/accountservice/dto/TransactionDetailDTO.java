@@ -15,19 +15,29 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
+@ApiModel(description = "All information detailed about a single account transaction.")
 public class TransactionDetailDTO implements Serializable {
 
     private static final long serialVersionUID = -2154381290294551470L;
 
+    @ApiModelProperty(notes = "The signed amount of the transaction")
     private BigDecimal amount;
+
+    @ApiModelProperty(notes = "The transaction type (deposit, withdrawal, debit, checks)")
     private String transactionType;
+
+    @ApiModelProperty(notes = "A description for this transaction")
     private String description;
+
+    @ApiModelProperty(notes = "A date time for transaction")
     private String transactionDate;
 
 }

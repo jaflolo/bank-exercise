@@ -15,16 +15,25 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
+@ApiModel(description = "Lightweight information about account.")
 public class AccountDTO implements Serializable {
 
     private static final long serialVersionUID = 4023402792612616081L;
+
+    @ApiModelProperty(notes = "The account ID")
     private Long accountId;
+
+    @ApiModelProperty(notes = "The account number")
     private String accountNumber;
+
+    @ApiModelProperty(notes = "The account holder full name")
     private String holderFullName;
 
 }

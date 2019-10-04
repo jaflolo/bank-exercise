@@ -18,6 +18,7 @@ package com.test.bank.accountservice.util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class GeneralUtils {
 
@@ -40,6 +41,18 @@ public class GeneralUtils {
 
         return formattedDate;
     }
+
+    public static boolean isPinNumericNonZero(String strNum) {
+        try {
+            Long.valueOf(strNum);
+            Pattern digitPattern = Pattern.compile("[1-9]{4}");
+            return digitPattern.matcher(strNum).matches();
+        } catch (NumberFormatException | NullPointerException nfe) {
+            return false;
+        }
+    }
+
+
 
 
 

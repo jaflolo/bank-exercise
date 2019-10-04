@@ -16,12 +16,16 @@
 package com.test.bank.accountservice.model;
 
 import com.test.bank.accountservice.enums.AccountStatus;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -55,6 +59,22 @@ public class Account implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private AccountStatus status;
+
+    @Getter(AccessLevel.NONE)
+    @Column(name = "balance")
+    private BigDecimal balance = new BigDecimal(0);
+
+    public synchronized void withdraw(BigDecimal amount) {
+        this.balance = getBalance().subtract(amount);
+    }
+
+    public synchronized void deposit(BigDecimal amount) {
+        balance = getBalance().add(amount);
+    }
+
+    public synchronized BigDecimal getBalance() {
+        return this.balance;
+    }
 
     public Account(){}
 

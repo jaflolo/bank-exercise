@@ -20,13 +20,13 @@ import com.test.bank.accountservice.enums.AccountStatus;
 import com.test.bank.accountservice.enums.TransactionType;
 import com.test.bank.accountservice.exception.ApiException;
 import com.test.bank.accountservice.model.Account;
-import com.test.bank.accountservice.model.AccountBalance;
 import com.test.bank.accountservice.model.AccountTransaction;
-import com.test.bank.accountservice.repository.AccountBalanceRepository;
 import com.test.bank.accountservice.repository.AccountRepository;
 import com.test.bank.accountservice.repository.AccountTransactionRepository;
 import com.test.bank.accountservice.util.Constants;
+import com.test.bank.accountservice.util.GeneralUtils;
 import io.micrometer.core.instrument.util.StringUtils;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -46,6 +46,7 @@ import static com.test.bank.accountservice.util.GeneralUtils.generateAccountNumb
 
 @Service
 @Transactional(rollbackOn = Exception.class)
+@Log4j2
 public class AccountServiceImpl implements AccountService {
     private static Random random = new Random();
 
@@ -54,9 +55,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountTransactionRepository accountTransactionRepository;
-
-    @Autowired
-    private AccountBalanceRepository accountBalanceRepository;
 
     @Override
     public AccountDetailDTO findAccount(Long accountId) {
@@ -73,6 +71,11 @@ public class AccountServiceImpl implements AccountService {
         assertValidPin(pin);
 
         final Account account = accountRepository.findByAccountNumberAndPin(number, pin);
+
+        if(account == null){
+            throw new ApiException("The account does not exist");
+        }
+
         final AccountDTO dto = new AccountDTO();
         dto.setAccountId(account.getId());
         dto.setAccountNumber(account.getAccountNumber());
@@ -90,8 +93,7 @@ public class AccountServiceImpl implements AccountService {
         detailsDTO.setAccountNumber(account.getAccountNumber());
         detailsDTO.setAccountPin(account.getPin());
 
-        final AccountBalanceDTO currentBalance = this.getCurrentBalance(account.getId());
-        detailsDTO.setCurrentBalance(currentBalance.getBalance());
+        detailsDTO.setCurrentBalance(account.getBalance());
         detailsDTO.setHolderFullName(String.format("%s %s", account.getFirstName(),account.getLastName()));
         detailsDTO.setHolderId(account.getHolderId());
 
@@ -142,12 +144,6 @@ public class AccountServiceImpl implements AccountService {
         accountToSave.setStatus(AccountStatus.ACTIVE);
         accountRepository.save(accountToSave);
 
-        final AccountBalance accountBalance = new AccountBalance();
-        accountBalance.setAccount(accountToSave);
-        accountBalance.setBalanceDate(LocalDateTime.now());
-        accountBalance.setBalance(BigDecimal.ZERO);
-        accountBalanceRepository.save(accountBalance);
-
         final ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setAccountNumber(accountToSave.getAccountNumber());
         responseDTO.setPin(accountToSave.getPin());
@@ -155,6 +151,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void assertValidData(AccountRequestDTO account) {
+        if(account.getAccountPin() == null || account.getAccountPin().length() == 0){
+            throw new ApiException("Pin number is mandatory.");
+        }
+
+        if(!GeneralUtils.isPinNumericNonZero(account.getAccountPin())){
+            throw new ApiException("Pin number should be of 4 numeric digits with non zero values.");
+        }
+
         if(!account.getAccountPin().equals(account.getConfAccountPin())){
             throw new ApiException("Pin and Pin Confirmation does not match.");
         }
@@ -167,9 +171,7 @@ public class AccountServiceImpl implements AccountService {
         assertExistAccount(accountOptional);
 
         final Account account = accountOptional.get();
-        final AccountBalanceDTO currentBalance = this.getCurrentBalance(account.getId());
-
-        if(currentBalance.getBalance().compareTo(BigDecimal.ZERO) < 0){
+        if(account.getBalance().compareTo(BigDecimal.ZERO) < 0){
             throw new ApiException("The account can not be closed due to it is overdrawn.");
         }
 
@@ -186,24 +188,24 @@ public class AccountServiceImpl implements AccountService {
             throw new ApiException("Account does not exist");
         }
 
-        final AccountBalance currentBalance = accountBalanceRepository.findTopByAccountIdOrderByBalanceDateDesc(accountId);
         final AccountBalanceDTO balanceDTO = new AccountBalanceDTO();
+        final BigDecimal runningBalance = accountRepository.getRunningBalance(accountId);
 
-        if(currentBalance != null){
-            balanceDTO.setAccountNumber(currentBalance.getAccount().getAccountNumber());
-            balanceDTO.setBalance(currentBalance.getBalance());
+        if(runningBalance != null){
+            balanceDTO.setAccountId(accountId);
+            balanceDTO.setBalance(runningBalance);
         }
 
         return balanceDTO;
     }
 
     @Override
-    public synchronized ResponseDTO makeDeposit(Long accountId, TransactionRequestDTO transaction) {
+    public  ResponseDTO makeDeposit(Long accountId, TransactionRequestDTO transaction) {
         transaction.setType(Constants.TRANSACTION_DEBIT);
         return processTransaction(accountId, transaction, DEPOSIT);
     }
 
-    private ResponseDTO processTransaction(Long accountId, TransactionRequestDTO transaction, TransactionType transactionType){
+    private synchronized ResponseDTO processTransaction(Long accountId, TransactionRequestDTO transaction, TransactionType transactionType){
         final ResponseDTO responseDTO = new ResponseDTO();
         final Optional<Account> accountOptional = accountRepository.findById(accountId);
 
@@ -214,14 +216,20 @@ public class AccountServiceImpl implements AccountService {
         final Account account = accountOptional.get();
         final BigDecimal amount = calculateSignedAmount(transaction);
 
-        final AccountBalanceDTO currentBalance = this.getCurrentBalance(account.getId());
-        assertAccountNotOverdrawn(currentBalance.getBalance(), amount);
+        assertAccountNotOverdrawn(account.getBalance(), amount);
+
+        if(transaction.getType().equals(Constants.TRANSACTION_DEBIT)){
+            account.deposit(transaction.getAmount());
+        } else {
+            account.withdraw(transaction.getAmount());
+        }
+
+        accountRepository.save(account);
+
+        System.out.println("--> SERVICE NEW BALANCE: " + account.getBalance());
 
         final String transactionId = saveTransaction(transactionType, transaction, account, amount);
         responseDTO.setTransactionId(transactionId);
-
-        updateAccountBalance(currentBalance.getBalance(), account, amount);
-
         return responseDTO;
     }
 
@@ -231,11 +239,6 @@ public class AccountServiceImpl implements AccountService {
                 .contains(type)){
             throw new ApiException("Transaction type [DEBIT, CREDIT] is required to process current operation.");
         }
-    }
-
-    private void updateAccountBalance(BigDecimal currentBalance, Account account, BigDecimal amount) {
-        final BigDecimal newBalance = currentBalance.add(amount);
-        accountBalanceRepository.save(buildAccountBalance(newBalance, account));
     }
 
     private String saveTransaction(TransactionType transactionType,
@@ -262,14 +265,6 @@ public class AccountServiceImpl implements AccountService {
         return localAmount;
     }
 
-    private AccountBalance buildAccountBalance(BigDecimal currentBalance, Account account) {
-        final AccountBalance accountBalance = new AccountBalance();
-        accountBalance.setAccount(account);
-        accountBalance.setBalance(currentBalance);
-        accountBalance.setBalanceDate(LocalDateTime.now());
-        return accountBalance;
-    }
-
     private void assertTypeNotNull(String type) {
         if(type == null){
             throw new ApiException("Transaction Type is mandatory [DEBIT,CREDIT]");
@@ -292,18 +287,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public synchronized ResponseDTO makeWithdrawal(Long accountId, TransactionRequestDTO transaction) {
+    public  ResponseDTO makeWithdrawal(Long accountId, TransactionRequestDTO transaction) {
         transaction.setType(Constants.TRANSACTION_CREDIT);
         return processTransaction(accountId, transaction, WITHDRAWAL);
     }
 
     @Override
-    public synchronized ResponseDTO processCheck(Long accountId, TransactionRequestDTO transaction) {
+    public  ResponseDTO processCheck(Long accountId, TransactionRequestDTO transaction) {
         return processTransaction(accountId, transaction, CHECKS);
     }
 
     @Override
-    public synchronized ResponseDTO processDebit(Long accountId, TransactionRequestDTO transaction) {
+    public  ResponseDTO processDebit(Long accountId, TransactionRequestDTO transaction) {
         return processTransaction(accountId, transaction, DEBIT);
     }
 }

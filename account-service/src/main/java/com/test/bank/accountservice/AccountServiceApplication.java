@@ -15,52 +15,14 @@
  */
 package com.test.bank.accountservice;
 
-import com.test.bank.accountservice.enums.AccountStatus;
-import com.test.bank.accountservice.model.Account;
-import com.test.bank.accountservice.model.AccountBalance;
-import com.test.bank.accountservice.repository.AccountBalanceRepository;
-import com.test.bank.accountservice.repository.AccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @SpringBootApplication
-@EnableTransactionManagement
 public class AccountServiceApplication {
-
-	@Autowired
-	private AccountRepository accountRepository;
-	@Autowired
-	private AccountBalanceRepository accountBalanceRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(AccountServiceApplication.class, args);
-	}
-
-	@Bean
-	CommandLineRunner runner(){
-		return args -> {
-			final Account account = new Account();
-			account.setAccountNumber("12345678");
-			account.setFirstName("Jaime");
-			account.setLastName("Flores");
-			account.setHolderId("522665465785546963");
-			account.setPin("1234");
-			account.setStatus(AccountStatus.ACTIVE);
-			accountRepository.save(account);
-
-			final AccountBalance accountBalance = new AccountBalance();
-			accountBalance.setBalanceDate(LocalDateTime.now());
-			accountBalance.setBalance(BigDecimal.ZERO);
-			accountBalance.setAccount(account);
-			accountBalanceRepository.save(accountBalance);
-		};
 	}
 
 }

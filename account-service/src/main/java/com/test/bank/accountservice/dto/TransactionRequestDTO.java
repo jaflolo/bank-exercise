@@ -15,6 +15,8 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,11 +25,17 @@ import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
+@ApiModel(description = "Generic information to make a transaction.")
 public class TransactionRequestDTO implements Serializable {
     private static final long serialVersionUID = 3078353904952199958L;
 
+    @ApiModelProperty(notes = "Positive amount of the transaction")
     private BigDecimal amount;
+
+    @ApiModelProperty(notes = "Indicates if transaction is DEBIT or CREDIT useful for debit and checks operations")
     private String type;
+
+    @ApiModelProperty(notes = "A description for the transaction")
     private String description;
 
     public TransactionRequestDTO(BigDecimal amount, String description) {

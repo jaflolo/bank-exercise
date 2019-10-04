@@ -15,6 +15,8 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +27,13 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel(description = "All information about account balance.")
 public class AccountBalanceDTO implements Serializable {
-    private String accountNumber;
+
+    @ApiModelProperty(notes = "The account ID")
+    private Long accountId;
+
+    @ApiModelProperty(notes = "The current account balance")
     private BigDecimal balance = BigDecimal.ZERO;
+
 }

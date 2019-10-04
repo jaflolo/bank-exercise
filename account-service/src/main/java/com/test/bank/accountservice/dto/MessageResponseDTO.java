@@ -15,6 +15,8 @@
  */
 package com.test.bank.accountservice.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,10 +26,12 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiModel(description = "Common object to send messages to consumers")
 public class MessageResponseDTO implements Serializable {
 
     private static final long serialVersionUID = 1141467997923213196L;
 
+    @ApiModelProperty(notes = "Detailed message")
     private String message;
 
 }
