@@ -54,7 +54,7 @@ Please execute both scripts in different terminals with the following commands:
 sh run-service.sh
 sh run-client.sh
 ```
-## 6. Command Line Interface Usage
+## 6. Console Interface Usage
 The Client is a very simple command line interface which allows you to execute functionality based on short menus like this: 
 
 #### a. Welcome Menu
@@ -138,6 +138,46 @@ Current Balance: 20.00
 -> Select an option:  
 ```
 That's it, feel free to interact with the client interface.
+
+## Extra. Simple Command Line Interface
+There was also added a command line interface where you can execute simple commands to execute operations on a checks banck account.
+
+For help information, please run the following command
+```
+$ ./bank.sh --help
+```
+and you we'll see something like this:
+```
+Available Commands
+    open             Open an account
+          open  [First Name] [Last Name] [Pin] [Confirm Pin] [ID SSN]   
+    login            Login to an existing account
+          login [Account number] [PIN] 
+    close            Close an account
+    deposit          Makes a deposit
+          deposit [amount] [description] 
+    withdraw         Makes a withdraw
+          withdraw [amount] [description] 
+    balance          Get the current balance for actual logged in account
+    logout           Logout the actual logged int account
+```
+Once you have read the available commands, then you can start executing functionality like the following full example
+```
+$ ./bank.sh open Jaime Flores 1234 1234 asdasdasd123123
+Transaction executed successfully
+Account number: 320292025
+Pin number: 1234
+$ ./bank.sh login 320292025 1234
+OK...
+$ ./bank.sh deposit 1000 "Salary" && ./bank.sh deposit 20 "Gasonline" && ./bank.sh deposit 100 "Concert tickets"
+Transaction ok  47063dce-71ab-4f03-9ba4-a0ee258ccb9b
+Transaction ok  180b59d6-4dbf-4348-8d03-88a521e7efdd
+Transaction ok  0ddad77f-2bfb-4f91-a89b-2c5abe61c6db
+$ ./bank.sh balance
+Current balance is 1120.00
+$ ./bank.sh logout
+Logout ok...
+```
 
 ## Lauch Swagger
 While the spring boot proyect is started, you can lauch swagger UI, it is available at http://localhost:8080/swagger-ui.html. Here is the Home Page of Swagger where you can see all the resources that are exposed.
