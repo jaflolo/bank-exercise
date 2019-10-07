@@ -179,7 +179,7 @@ $ ./bank.sh logout
 Logout ok...
 ```
 
-Note: It is necessary that `sh run-service.sh` is running before starting executing to execute CLI commands.
+Note: It is necessary that `sh run-service.sh` is started up while running CLI commands.
 
 
 ## Lauch Swagger
