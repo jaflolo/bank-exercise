@@ -140,7 +140,7 @@ Current Balance: 20.00
 That's it, feel free to interact with the client interface.
 
 ## Extra. Simple Command Line Interface
-There was also added a command line interface where you can execute simple commands to execute operations on a checks banck account.
+There was also added a command line interface where you can run simple commands to execute operations on a checks bank account.
 
 For help information, please run the following command
 ```
