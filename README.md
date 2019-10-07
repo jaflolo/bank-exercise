@@ -179,6 +179,9 @@ $ ./bank.sh logout
 Logout ok...
 ```
 
+Note: It is necessary that `sh run-service.sh` is running before starting executing to execute CLI commands.
+
+
 ## Lauch Swagger
 While the spring boot proyect is started, you can lauch swagger UI, it is available at http://localhost:8080/swagger-ui.html. Here is the Home Page of Swagger where you can see all the resources that are exposed.
 
